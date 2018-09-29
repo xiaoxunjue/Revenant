@@ -369,6 +369,20 @@ public class MainActivity extends AppCompatActivity implements JsApi.JsCallback,
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
+
+
+            /*
+            * 前端视频自动播放
+            * */
+//            view.loadUrl("javascript:(function() { " +
+//                    "var videos = document.getElementsByTagName('video');" +
+//                    " for(var i=0;i<videos.length;i++){videos[i].play();}})()");
+            /*
+             * 前端音频自动播放
+             * */
+//            view.loadUrl("javascript:(function() { " +
+//                    "var videos = document.getElementsByTagName('audio');" +
+//                    " for(var i=0;i<videos.length;i++){videos[i].play();}})()");
             smartRefreshLayout.finishRefresh();
             if (firstLoad) {
                 firstLoad = false;
