@@ -45,9 +45,11 @@ import com.amap.api.location.AMapLocationQualityReport;
 import com.apkfuns.logutils.LogUtils;
 import com.example.revenant.revenant.Bean.Event;
 import com.example.revenant.revenant.Bean.EventCode;
+import com.example.revenant.revenant.Bean.WxPayParams;
 import com.example.revenant.revenant.Event.JsApi;
 import com.example.revenant.revenant.Utils.DemoIntentService;
 import com.example.revenant.revenant.Utils.DemoPushService;
+import com.example.revenant.revenant.Utils.GsonUtils;
 import com.example.revenant.revenant.Utils.LoadDialog;
 import com.example.revenant.revenant.Utils.PayResult;
 import com.example.revenant.revenant.Utils.StatusBarUtil;
@@ -68,6 +70,10 @@ import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.header.ClassicsHeader;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
+import com.tencent.connect.common.Constants;
+import com.tencent.mm.opensdk.modelpay.PayReq;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 import com.umeng.socialize.ShareAction;
 import com.umeng.socialize.UMAuthListener;
 import com.umeng.socialize.UMShareAPI;
@@ -128,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements JsApi.JsCallback,
     protected String finishAudioPath;
     protected String finishTimeLong;
     private String mVoiceLong;
+    private IWXAPI api = WXAPIFactory.createWXAPI(this, com.example.revenant.revenant.Utils.Constant.WEiXIN_APP_ID);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -372,8 +379,8 @@ public class MainActivity extends AppCompatActivity implements JsApi.JsCallback,
 
 
             /*
-            * 前端视频自动播放
-            * */
+             * 前端视频自动播放
+             * */
 //            view.loadUrl("javascript:(function() { " +
 //                    "var videos = document.getElementsByTagName('video');" +
 //                    " for(var i=0;i<videos.length;i++){videos[i].play();}})()");
@@ -450,6 +457,8 @@ public class MainActivity extends AppCompatActivity implements JsApi.JsCallback,
     public void onEvent(Event testEvent) {
         if (testEvent.getCode() == EventCode.EventCodeNum.A) {
             clientId = testEvent.getData().toString();
+        } else if (testEvent.getCode() == EventCode.EventCodeNum.B) {
+            dWebView.callHandler("weChatPayCallBack", new Object[]{testEvent.getData().toString()});
         }
     }
 
@@ -547,8 +556,7 @@ public class MainActivity extends AppCompatActivity implements JsApi.JsCallback,
         }
     }
 
-    private void uploadImages(
-            List<File> map) {
+    private void uploadImages(List<File> map) {
         OkGo.<String>post(uploadMany)
                 .tag(this)
                 .params("token", "1111")
@@ -852,6 +860,10 @@ public class MainActivity extends AppCompatActivity implements JsApi.JsCallback,
 
     @Override
     public void getPayInfo(Object params) {
+
+        /*
+         * 支付宝的信息
+         * */
         OkGo.<String>post(pay)
                 .tag(this)
                 .params("type", "AAAAa")
@@ -868,6 +880,14 @@ public class MainActivity extends AppCompatActivity implements JsApi.JsCallback,
 
                     }
                 });
+
+        /*
+         * 微信支付信息
+         * */
+
+
+        WxPayParams wxPayParams = GsonUtils.parseJsonWithGson(params.toString(), WxPayParams.class);
+        wxPay(wxPayParams);
     }
 
     @Override
@@ -1012,7 +1032,6 @@ public class MainActivity extends AppCompatActivity implements JsApi.JsCallback,
     }
 
 
-
     @Override
     public void onFinishedRecord(String audioPath, String voiceLong) {
         finishAudioPath = audioPath;
@@ -1023,5 +1042,22 @@ public class MainActivity extends AppCompatActivity implements JsApi.JsCallback,
         mVoiceLong = voiceLong;
 
 
+    }
+
+    /**
+     * 微信支付
+     *
+     * @param params
+     */
+    private void wxPay(WxPayParams params) {
+        PayReq req = new PayReq();
+        req.appId = params.getAppId();
+        req.partnerId = params.getPartnerId();
+        req.prepayId = params.getPrepayId();
+        req.packageValue = params.getPackages();
+        req.nonceStr = params.getNonceStr();
+        req.timeStamp = params.getTimeStamp();
+        req.sign = params.getSign();
+        api.sendReq(req);
     }
 }

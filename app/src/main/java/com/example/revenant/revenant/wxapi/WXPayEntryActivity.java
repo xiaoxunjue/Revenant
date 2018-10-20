@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.apkfuns.logutils.LogUtils;
+import com.example.revenant.revenant.Bean.Event;
+import com.example.revenant.revenant.Bean.EventCode;
 import com.example.revenant.revenant.R;
 import com.tencent.mm.opensdk.constants.ConstantsAPI;
 import com.tencent.mm.opensdk.modelbase.BaseReq;
@@ -14,6 +16,9 @@ import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
+import org.greenrobot.eventbus.EventBus;
+
+import static com.example.revenant.revenant.Bean.EventCode.EventCodeNum.C;
 import static com.example.revenant.revenant.Utils.Constant.WEiXIN_APP_ID;
 
 
@@ -52,7 +57,8 @@ public class WXPayEntryActivity extends Activity implements IWXAPIEventHandler {
 
                 LogUtils.d("AAAAAAAAAAAAAAAAAA支付成功");
 //
-
+                Event event=new Event(EventCode.EventCodeNum.B,"1");
+                EventBus.getDefault().post(event);
             } else {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -60,6 +66,8 @@ public class WXPayEntryActivity extends Activity implements IWXAPIEventHandler {
                 builder.setMessage("支付失败");
                 builder.show();
                 finish();
+                Event event=new Event(EventCode.EventCodeNum.B,"0");
+                EventBus.getDefault().post(event);
             }
 //
         }

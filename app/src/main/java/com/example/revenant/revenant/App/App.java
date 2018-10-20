@@ -4,6 +4,8 @@ import android.app.Application;
 
 import com.example.revenant.revenant.Utils.Constant;
 import com.lzy.okgo.OkGo;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 import com.umeng.commonsdk.BuildConfig;
 import com.umeng.commonsdk.UMConfigure;
 import com.umeng.socialize.PlatformConfig;
@@ -14,6 +16,7 @@ import static com.example.revenant.revenant.Utils.Constant.WEIXIN_SECRET;
 import static com.example.revenant.revenant.Utils.Constant.WEiXIN_APP_ID;
 
 public class App extends Application {
+    public static IWXAPI mWxApi;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -25,5 +28,8 @@ public class App extends Application {
                 "");
         PlatformConfig.setWeixin(WEiXIN_APP_ID, WEIXIN_SECRET);
         PlatformConfig.setQQZone(QQAPP_ID,QQSECRET);
+        mWxApi = WXAPIFactory.createWXAPI(this, Constant.WEiXIN_APP_ID, false);
+        // 将该app注册到微信
+        mWxApi.registerApp(Constant.WEiXIN_APP_ID);
     }
 }
